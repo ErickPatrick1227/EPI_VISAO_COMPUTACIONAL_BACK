@@ -36,12 +36,86 @@ public class InfracaoController {
     }
 
     @GetMapping("/infracoes")
-    public ResponseEntity<List<InfracaoResponse>> listarInfracoes() {
-        var lista = infracaoRepository.findAllByOrderByCriadoEmDesc()
-                .stream()
+    public ResponseEntity<List<InfracaoResponse>> listarInfracoes(
+            @RequestParam(required = false) String cameraId,
+            @RequestParam(required = false) Boolean visualizada,
+            @RequestParam(required = false) String mensagem
+    ) {
+
+        List<Infracao> lista;
+
+        // câmera + visualizada
+        if (cameraId != null && visualizada != null) {
+            lista = infracaoRepository
+                    .findByCameraIdAndVisualizadaOrderByCriadoEmDesc(
+                            cameraId,
+                            visualizada
+                    );
+        }
+
+        // câmera
+        else if (cameraId != null) {
+            lista = infracaoRepository
+                    .findByCameraIdOrderByCriadoEmDesc(cameraId);
+        }
+
+        // visualizada
+        else if (visualizada != null) {
+            lista = infracaoRepository
+                    .findByVisualizadaOrderByCriadoEmDesc(visualizada);
+        }
+
+        // mensagem
+        else if (mensagem != null) {
+            lista = infracaoRepository
+                    .findByMensagemContainingIgnoreCaseOrderByCriadoEmDesc(
+                            mensagem
+                    );
+        }
+
+        // todas
+        else {
+            lista = infracaoRepository.findAllByOrderByCriadoEmDesc();
+        }
+
+        var response = lista.stream()
                 .map(InfracaoResponse::from)
                 .toList();
-        return ResponseEntity.ok(lista);
+
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/infracoes/filtro")
+    public ResponseEntity<List<InfracaoResponse>> filtrarInfracoes(
+            @RequestParam(required = false) String cameraId,
+            @RequestParam(required = false) Boolean visualizada
+    ) {
+
+        List<Infracao> lista;
+
+        if (cameraId != null && visualizada != null) {
+            lista = infracaoRepository
+                    .findByCameraIdAndVisualizadaOrderByCriadoEmDesc(
+                            cameraId,
+                            visualizada
+                    );
+
+        } else if (cameraId != null) {
+            lista = infracaoRepository
+                    .findByCameraIdOrderByCriadoEmDesc(cameraId);
+
+        } else if (visualizada != null) {
+            lista = infracaoRepository
+                    .findByVisualizadaOrderByCriadoEmDesc(visualizada);
+
+        } else {
+            lista = infracaoRepository.findAllByOrderByCriadoEmDesc();
+        }
+
+        return ResponseEntity.ok(
+                lista.stream()
+                        .map(InfracaoResponse::from)
+                        .toList()
+        );
     }
 
     @GetMapping("/infracoes/pendentes")
