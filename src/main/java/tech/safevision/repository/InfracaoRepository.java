@@ -18,4 +18,16 @@ public interface InfracaoRepository extends JpaRepository<Infracao, Long> {
 
     @Query("SELECT COUNT(i) FROM Infracao i WHERE i.criadoEm >= :inicio")
     long countInfracoesHoje(LocalDateTime inicio);
+
+    //Criação de filtros
+    List<Infracao> findByCameraIdOrderByCriadoEmDesc(String cameraId);
+
+    List<Infracao> findByVisualizadaOrderByCriadoEmDesc(boolean visualizada);
+
+    List<Infracao> findByMensagemContainingIgnoreCaseOrderByCriadoEmDesc(String mensagem);
+
+    List<Infracao> findByCameraIdAndVisualizadaOrderByCriadoEmDesc(
+            String cameraId,
+            boolean visualizada
+    );
 }
