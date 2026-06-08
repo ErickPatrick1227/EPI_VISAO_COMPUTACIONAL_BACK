@@ -1,4 +1,6 @@
 package tech.safevision.controller.dto;
 
-public class AlterarSenhaRequest {
-}
+public record AlterarSenhaRequest(
+        String senhaAtual,
+        String novaSenha
+) {}
