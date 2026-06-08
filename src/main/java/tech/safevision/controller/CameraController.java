@@ -13,11 +13,18 @@ import java.io.File;
 @RequestMapping("/api/cameras")
 public class CameraController {
 
-    @GetMapping("/frame")
-    public ResponseEntity<Resource> frameAtual() {
+    @GetMapping("/frame/{cameraId}")
+    public ResponseEntity<Resource> frameAtual(
+            @PathVariable String cameraId) {
+
+        if (!cameraId.matches("camera\\d+")) {
+            return ResponseEntity.badRequest().build();
+        }
+
 
         File file = new File(
-                "C:/Users/Sarah/Desktop/EPI-Visão Computacional/data/models/src/evidencias/frame_atual.jpg"
+                "C:/Users/Sarah/Desktop/EPI-Visão Computacional/data/models/src/evidencias/"
+                        + cameraId + ".jpg"
         );
 
         if (!file.exists()) {
