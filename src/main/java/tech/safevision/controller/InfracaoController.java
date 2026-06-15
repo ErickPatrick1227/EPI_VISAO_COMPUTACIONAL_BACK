@@ -7,6 +7,7 @@ import tech.safevision.controller.dto.InfracaoRequest;
 import tech.safevision.controller.dto.InfracaoResponse;
 import tech.safevision.entities.Infracao;
 import tech.safevision.repository.InfracaoRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,22 +18,48 @@ import java.util.List;
 @RequestMapping("/api")
 public class InfracaoController {
 
+    private final SimpMessagingTemplate messagingTemplate;
     private final InfracaoRepository infracaoRepository;
 
-    public InfracaoController(InfracaoRepository infracaoRepository) {
+
+    public InfracaoController(
+            InfracaoRepository infracaoRepository,
+            SimpMessagingTemplate messagingTemplate) {
+
         this.infracaoRepository = infracaoRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
+    //public InfracaoController(InfracaoRepository infracaoRepository) {
+       // this.infracaoRepository = infracaoRepository;
+   // }
+
     @PostMapping("/internal/infracoes")
-    public ResponseEntity<InfracaoResponse> receberInfracao(@RequestBody InfracaoRequest request) {
+    public ResponseEntity<InfracaoResponse> receberInfracao(
+            @RequestBody InfracaoRequest request) {
+
         var infracao = new Infracao();
+
         infracao.setPessoaId(request.pessoaId());
         infracao.setMensagem(request.mensagem());
         infracao.setEvidenciaPath(request.evidenciaPath());
-        infracao.setCameraId(request.cameraId() != null ? request.cameraId() : "camera-1");
+
+        infracao.setCameraId(
+                request.cameraId() != null
+                        ? request.cameraId()
+                        : "camera-1"
+        );
 
         var saved = infracaoRepository.save(infracao);
-        return ResponseEntity.ok(InfracaoResponse.from(saved));
+
+        var response = InfracaoResponse.from(saved);
+
+        messagingTemplate.convertAndSend(
+                "/topic/alertas",
+                response
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/infracoes")
