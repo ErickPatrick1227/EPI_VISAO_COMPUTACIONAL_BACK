@@ -57,6 +57,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/internal/infracoes").permitAll()
                         // Imagens de evidência — públicas para o frontend carregar sem JWT
                         .requestMatchers(HttpMethod.GET, "/evidencias/**").permitAll()
+                        //Busca imagens das evidências
+                        .requestMatchers(HttpMethod.GET, "/api/cameras/frame").permitAll()
+                        .requestMatchers("/api/cameras/frame/**").permitAll()
                         // Qualquer outra rota exige JWT
                         .anyRequest().authenticated()
                 )
